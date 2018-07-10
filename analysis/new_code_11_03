@@ -1,0 +1,71 @@
+close all;
+clear all;
+%% import data
+%This dataset (2014) has a measurement for every 3 hour.
+% column 1 - 6 is the year, month, date, hour, minute, sec
+
+% voc_2016 = importdata('Mastdata_VOC_2016.txt');
+% voc_2017 = importdata('Mastdata_VOC_2017.txt');
+CS_file  = load(['/home/local/carltonx/Documents/Smear_course/Hyde_Condensation_sink_1996_2016.dat']);
+voc_2014 = load(['/home/local/carltonx/Documents/Smear_course/ptrms_ppbv_2014_42_qc.dat']);
+section_analysis=load('sector_analysis.mat'); %% reading .mat file
+sect= struct2array(section_analysis); % converting from struct to array
+temp_2014= load('/home/local/carltonx/Documents/Smear_course/temp_2014.txt');
+
+%% Calculate median hourly VOC
+ datenum_temp = datenum(temp_2014(:,1:6));
+
+%Finding the index
+[datevec_voc,~,ind]= unique(voc_2014(2:end,1:4),'rows'); % find data for every hour
+%Mean value of monoterpenes based on hours
+mono_median_h = grpstats(voc_2014(2:end,27),ind,'nanmedian'); % make medians
+datenum_voc=datenum([datevec_voc,zeros(length(datevec_voc),2)]); %create corresponding time in datenum format
+
+datenum_sect=datevec(time);
+
+%% average CS
+min60=datenum(0,0,0,1,0,0);
+median_cs=nan(length(mono_median_h),1);
+temp=nan(length(mono_median_h),1);
+
+
+for nvoc=1:length(mono_median_h)
+    h_idx=find(CS_file(:,1)>=datenum_voc(nvoc,1) & CS_file(:,1)<datenum_voc(nvoc,1)+min60);
+    if ~isempty(h_idx)
+        median_cs(nvoc,1)=nanmedian(CS_file(h_idx,2));
+    end
+end
+
+for nvoc=1:length(mono_median_h)
+   h_idx_t=find(datenum_temp(:,1)>=datenum_voc(nvoc,1) & datenum_temp(:,1)<datenum_voc(nvoc,1)+min60);
+    if ~isempty(h_idx_t)
+        temp(nvoc,1)=nanmedian(temp_2014(h_idx_t,7));
+    end
+end
+
+hours=[8:3:17]';
+
+
+for nf_s=1:length(hours)
+  ind_x=find(datenum_sect(:,4)==hours(nf_s));
+    if nf_s ==1
+      code_8=sect(ind_x,4); % codes for hour 8
+      land_8=sect(ind_x,3); % time over land for hour 8
+      clear ind_x
+    elseif nf_s ==2
+      code_11=sect(ind_x,4); % codes for hour 11
+      land_11=sect(ind_x,3); % time over land for hour 11
+      clear ind_x
+    elseif nf_s ==3
+      code_14=sect(ind_x,4); % codes for hour 14
+      land_14=sect(ind_x,3);% time over land for hour 14
+      clear ind_x
+    else nf_s == 4
+      code_17=sect(ind_x,4); % codes for hour 17
+      land_17=sect(ind_x,3);% time over land for hour 17
+      clear ind_x
+  end
+end
+
+codes=[code_8,code_11,code_14,code_17];
+land=[land_8,land_11,land_14,land_17];

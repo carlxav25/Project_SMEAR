@@ -1,0 +1,40 @@
+This packet is for calculating condensation sinks
+
+usage: 
+
+Load the DMPS file
+>> v = load('DMPSdatafile.sum')
+
+load temperature and rh data
+
+>> rh = load('rhdatafile')
+>> t =  load('tempdatafile')
+
+Check that the times are in the same format!
+
+>> CS = CS_calc_day(v,rh,t,3)
+
+If no rh data available or you want the dry CS,
+
+>> CS = CS_calc_day(v,NaN,t,2)
+
+If no temp available, use a constant T:
+>> T = 5
+>> CS = CS_calc_day(v,rh,T,3)
+or 
+>> T = 5
+>> CS = CS_calc_day(v,NaN,T,2)
+
+Files included:
+*CS_calc_day.m
+*CS_general_dlog.m
+*CS_general.m
+*Dlog_to_N.m
+*Dlog_to_N_vect.m
+*GF_gamma_lauri.m
+*GFparam.m
+*integrate_distribution.m
+
+(c) Miikka Dal Maso
+
+
